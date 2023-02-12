@@ -104,7 +104,7 @@ const getDevsPerId = async (req: Request, res: Response): Promise<Response> => {
 
   const queryResult: QueryResult = await client.query(query);
 
-  const devFilter = queryResult.rows.find((el) => el.id === id);
+  const devFilter = queryResult.rows.find((el) => +el.id === +id);
 
   if (!devFilter) {
     return res.status(404).json({ message: "Developer not found!" });

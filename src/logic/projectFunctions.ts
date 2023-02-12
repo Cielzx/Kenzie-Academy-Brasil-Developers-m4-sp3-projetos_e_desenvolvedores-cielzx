@@ -109,8 +109,6 @@ const getDeveloperProject = async (
 
   const projectFilter = queryResult.rows.filter((el) => +el.developerId === id);
 
-  console.log(projectFilter);
-
   const devFilter = queryResult.rows.find((el) => +el.id === id);
 
   if (!devFilter) {

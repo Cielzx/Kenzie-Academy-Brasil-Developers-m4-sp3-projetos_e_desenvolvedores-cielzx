@@ -77,9 +77,15 @@ const createDevInfos = async (
 const getAllDevs = async (req: Request, res: Response): Promise<Response> => {
   const query: string = `
   SELECT
-      *
+      de."id" AS "developerID",
+      de."name" AS "developerName",
+      de."email" AS "developerEmail",
+      di."developerSince" AS "developerInfoDeveloperSince",
+      di."preferredOS" AS "developerInfoPreferredOS"
   FROM
-  developers
+    developers de
+  LEFT JOIN
+    developer_infos di ON de."developerInfoId" = di."id";
   `;
 
   const queryResult: QueryResult = await client.query(query);

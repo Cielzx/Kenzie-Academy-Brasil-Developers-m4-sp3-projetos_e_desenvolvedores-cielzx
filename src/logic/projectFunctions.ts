@@ -92,32 +92,6 @@ const createTechnologies = async (
   return res.status(201).json(queryResult.rows[0]);
 };
 
-const getProjectPerId = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
-  const id: number = +req.params.id;
-
-  const queryString: string = `
-    SELECT
-        *
-    FROM 
-        projects;
-    `;
-
-  const queryResult: QueryResult = await client.query(queryString);
-
-  const projectFilter = queryResult.rows.filter((el) => +el.id === id);
-
-  const devFilter = queryResult.rows.find((el) => +el.id === id);
-
-  if (!devFilter) {
-    return res.status(404).json({ message: "Project not found!" });
-  }
-
-  return res.status(200).json(projectFilter[0]);
-};
-
 const getDeveloperProject = async (
   req: Request,
   res: Response
@@ -128,13 +102,14 @@ const getDeveloperProject = async (
     SELECT
         *
     FROM 
-        projects pr
-    JOIN developers de ON pr."developerId" = de.id;
+        projects pr;
     `;
 
   const queryResult: QueryResult = await client.query(queryString);
 
-  const projectFilter = queryResult.rows.filter((el) => +el.id === id);
+  const projectFilter = queryResult.rows.filter((el) => +el.developerId === id);
+
+  console.log(projectFilter);
 
   const devFilter = queryResult.rows.find((el) => +el.id === id);
 
@@ -142,7 +117,7 @@ const getDeveloperProject = async (
     return res.status(404).json({ message: "Developer not found" });
   }
 
-  return res.status(200).json(projectFilter[0]);
+  return res.status(200).json(projectFilter);
 };
 
 const getAllProject = async (
@@ -151,27 +126,69 @@ const getAllProject = async (
 ): Promise<Response> => {
   const queryString: string = `
    SELECT
-	p."id" AS "projectID",
-	p."name" AS "projectName",
-	p."description" AS "projectDescription",
-	p."estimatedTime" AS "ProjectEstimatedTime",
-	p."repository" AS "ProjectRepository",
-	p."endDate" AS "ProjectEndDate",
-	p."startDate" AS "ProjectStartDate",
-	de."id" AS "DeveloperId",
-	te."id" AS "TechnologyId",
-	te."name" AS "TechnologyName"
-FROM
-	developers de
-LEFT JOIN
-		projects p ON de."id" = p."id"
-LEFT JOIN
-	technologies te ON p."id" = te."id";
+        pr."id" AS "projectId",
+        pr."name" AS "projectName",
+        pr."description" AS "projectDescription",
+        pr."estimatedTime" AS "projectEstimatedTime",
+        pr."repository" AS "projectRespository",
+        pr."startDate" AS "projectStartDate",
+        pr."endDate" AS "projectEndDate",
+        pr."developerId" AS "projectDeveloperId",
+        pt."techId" AS "technologyId",
+        te."name" AS "technologyName"
+   FROM 
+      projects pr
+    JOIN
+    projects_technologies pt ON pr.id = pt."projectId"
+    JOIN
+      technologies te ON pt."techId" = te."id" 
+    ;
     `;
 
   const queryResult: QueryResult = await client.query(queryString);
 
   return res.status(200).json(queryResult.rows);
+};
+
+const getProjectPerId = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const id: number = +req.params.id;
+
+  const queryString: string = `
+  SELECT
+       pr."id" AS "projectId",
+       pr."name" AS "projectName",
+       pr."description" AS "projectDescription",
+       pr."estimatedTime" AS "projectEstimatedTime",
+       pr."repository" AS "projectRespository",
+       pr."startDate" AS "projectStartDate",
+       pr."endDate" AS "projectEndDate",
+       pr."developerId" AS "projectDeveloperId",
+       pt."techId" AS "technologyId",
+       te."name" AS "technologyName"
+  FROM 
+     projects pr
+   JOIN
+   projects_technologies pt ON pr.id = pt."projectId"
+   JOIN
+     technologies te ON pt."techId" = te."id" 
+   ;`;
+
+  const queryResult: QueryResult = await client.query(queryString);
+
+  const projectFilter = queryResult.rows.filter((el) => +el.projectId === id);
+
+  const devFilter = queryResult.rows.find(
+    (el) => +el.projectDeveloperId === id
+  );
+
+  if (!devFilter) {
+    return res.status(404).json({ message: "Project not found!" });
+  }
+
+  return res.status(200).json(projectFilter[0]);
 };
 
 const DeleteProject = async (

@@ -24,6 +24,7 @@ import {
 import {
   ensureDevExist,
   ProjectKeys,
+  projectValidation,
   validateDev,
   validateDevInfo,
   validateUpdate,
@@ -36,7 +37,7 @@ app.post("/developers", validateDev, createDeveloper);
 
 app.post("/projects", ProjectKeys, createProjects);
 
-app.post("/projects/:id/technologies", createTechnologies);
+app.post("/projects/:id/technologies", projectValidation, createTechnologies);
 
 app.post(
   "/developers/:id/infos",

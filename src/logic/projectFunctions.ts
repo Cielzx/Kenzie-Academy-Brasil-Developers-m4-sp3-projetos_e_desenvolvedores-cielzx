@@ -38,7 +38,7 @@ const createTechnologies = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const techId: number = +req.params.id;
+  const projectId: number = +req.params.id;
   const techData: iTechRequest = req.body;
 
   let queryString: string = `
@@ -84,7 +84,7 @@ const createTechnologies = async (
 
   queryConfig = {
     text: queryString,
-    values: [techId, queryResultTech.rows[0].id, new Date()],
+    values: [projectId, queryResultTech.rows[0].id, new Date()],
   };
 
   const queryResult: TechResult = await client.query(queryConfig);

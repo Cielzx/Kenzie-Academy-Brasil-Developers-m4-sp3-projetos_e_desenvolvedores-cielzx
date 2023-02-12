@@ -78,6 +78,32 @@ const validateUpdate = async (
   next();
 };
 
+const projectValidation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const projectId = +req.params.id;
+
+  const queryString: string = `
+  SELECT 
+      *
+  FROM
+    projects;
+  `;
+
+  const queryResult: QueryResult = await client.query(queryString);
+  const projectFind = queryResult.rows.find((el) => +el.id === projectId);
+
+  if (!projectFind) {
+    return res.status(404).json({
+      message: "You must put a project ID or Project Doesn't exists",
+    });
+  }
+
+  next();
+};
+
 const validateDev = async (req: Request, res: Response, next: NextFunction) => {
   const Keys = Object.keys(req.body);
   const query: string = `
@@ -215,4 +241,5 @@ export {
   ensureDevExist,
   validateUpdate,
   ProjectKeys,
+  projectValidation,
 };

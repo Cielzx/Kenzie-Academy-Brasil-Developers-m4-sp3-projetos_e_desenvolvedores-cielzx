@@ -55,9 +55,9 @@ const createTechnologies = async (
     values: [techData.name],
   };
 
-  const queryResultParts = await client.query(queryConfig);
+  const queryResultTech = await client.query(queryConfig);
 
-  if (queryResultParts.rowCount === 0) {
+  if (queryResultTech.rowCount === 0) {
     return res.status(404).json({
       message: "Technology not supported.",
       options: [
@@ -84,7 +84,7 @@ const createTechnologies = async (
 
   queryConfig = {
     text: queryString,
-    values: [techId, queryResultParts.rows[0].id, new Date()],
+    values: [techId, queryResultTech.rows[0].id, new Date()],
   };
 
   const queryResult: TechResult = await client.query(queryConfig);
@@ -136,9 +136,9 @@ const getAllProject = async (
         te."name" AS "technologyName"
    FROM 
       projects pr
-    JOIN
+    LEFT JOIN
     projects_technologies pt ON pr.id = pt."projectId"
-    JOIN
+    LEFT JOIN
       technologies te ON pt."techId" = te."id" 
     ;
     `;

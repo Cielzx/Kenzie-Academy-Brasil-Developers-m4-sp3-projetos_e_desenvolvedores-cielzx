@@ -102,14 +102,14 @@ const getDeveloperProject = async (
     SELECT
         *
     FROM 
-        projects pr;
+        projects;
     `;
 
   const queryResult: QueryResult = await client.query(queryString);
 
   const projectFilter = queryResult.rows.filter((el) => +el.developerId === id);
 
-  const devFilter = queryResult.rows.find((el) => +el.id === id);
+  const devFilter = queryResult.rows.find((el) => +el.developerId === id);
 
   if (!devFilter) {
     return res.status(404).json({ message: "Developer not found" });
@@ -178,9 +178,7 @@ const getProjectPerId = async (
 
   const projectFilter = queryResult.rows.filter((el) => +el.projectId === id);
 
-  const devFilter = queryResult.rows.find(
-    (el) => +el.projectDeveloperId === id
-  );
+  const devFilter = queryResult.rows.find((el) => +el.projectId === id);
 
   if (!devFilter) {
     return res.status(404).json({ message: "Project not found!" });

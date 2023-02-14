@@ -170,7 +170,7 @@ const updateInfo = async (req: Request, res: Response): Promise<Response> => {
     return res.status(404).json({ message: "Developer not found!" });
   }
 
-  return res.status(200).json(queryResult.rows[0]);
+  return res.status(200).json(devFilter);
 };
 
 const DeleteDevs = async (req: Request, res: Response): Promise<Response> => {

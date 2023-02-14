@@ -16,11 +16,25 @@ const validateDevInfo = async (
   next: NextFunction
 ) => {
   const infoKeys = Object.keys(req.body);
+  const osInfos = req.body;
 
   const requiredInfoKeys: Array<devInfoRequire> = [
     "developerSince",
     "preferredOS",
   ];
+
+  const requiredOs: Array<InfoRequire> = ["Windows", "MacOs", "Linux"];
+
+  const validateOs = requiredOs.every((el) => osInfos["preferredOS"] === el);
+
+  console.log(validateOs);
+
+  // if (osInfos.preferredOS != requiredOs) {
+  //   return res.status(400).json({
+  //     message: "At least one of those keys must be send.",
+  //     keys: requiredOs,
+  //   });
+  // }
 
   const validateInfoKey = requiredInfoKeys.every((el: string) =>
     infoKeys.includes(el)

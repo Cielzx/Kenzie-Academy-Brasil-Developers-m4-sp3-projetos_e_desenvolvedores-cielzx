@@ -8,7 +8,11 @@ import {
 import { NextFunction, Request, Response } from "express";
 import { client } from "../database/database";
 import { QueryConfig, QueryResult } from "pg";
-import { projectRequire, updateRequire } from "../interface/ProjectInterface";
+import {
+  projectRequire,
+  techRequire,
+  updateRequire,
+} from "../interface/ProjectInterface";
 
 const validateDevInfo = async (
   req: Request,
@@ -57,20 +61,33 @@ const validateUpdate = async (
 ) => {
   const id: number = +req.params.id;
 
-  const UpdateKeys = Object.keys(req.body);
+  const UpdateKeys: Array<string> = Object.keys(req.body);
 
-  const requiredUpdateKeys: Array<updateRequire> = ["estimatedTime", "endDate"];
+  const reqKeys = Object.keys(req.body);
 
-  const validateUpdateKey = requiredUpdateKeys.every((el: string) =>
+  const requiredUpdateKeys: Array<updateRequire> = ["estimatedTime"];
+
+  const validateUpdateKey = requiredUpdateKeys.filter((el: string) =>
     UpdateKeys.includes(el)
   );
 
-  if (!validateUpdateKey) {
-    return res.status(400).json({
-      message: "At least one of those keys must be send.",
-      keys: requiredUpdateKeys,
-    });
+  const validateAllKeys = requiredUpdateKeys.every((key: any) =>
+    reqKeys.includes(key)
+  );
+
+  if (!validateAllKeys) {
+    return res
+      .status(400)
+      .json({ message: `Required keys are: ${requiredUpdateKeys}` });
   }
+
+  const validateEntriesKeys = validateUpdateKey.map((key: any) => {
+    return [key, req.body[key]];
+  });
+
+  const validateUpdate = Object.fromEntries(validateEntriesKeys);
+
+  req.validateUpdate = validateUpdate;
 
   const queryString: string = `
   SELECT 
@@ -89,6 +106,12 @@ const validateUpdate = async (
     });
   }
 
+  if (!devFind.developerId) {
+    return res.status(404).json({
+      message: "Dev not found.",
+    });
+  }
+
   next();
 };
 
@@ -98,6 +121,20 @@ const projectValidation = async (
   next: NextFunction
 ) => {
   const projectId = +req.params.id;
+
+  const keys: Array<string> = Object.keys(req.body);
+
+  const requiredKey: Array<techRequire> = ["name"];
+
+  const validateKey = keys.filter((el: any) => requiredKey.includes(el));
+
+  const validateEntriesKeys = validateKey.map((key: any) => {
+    return [key, req.body[key]];
+  });
+
+  const validateTech = Object.fromEntries(validateEntriesKeys);
+
+  req.validateTech = validateTech;
 
   const queryString: string = `
   SELECT 
@@ -119,7 +156,10 @@ const projectValidation = async (
 };
 
 const validateDev = async (req: Request, res: Response, next: NextFunction) => {
-  const Keys = Object.keys(req.body);
+  const Keys: Array<string> = Object.keys(req.body);
+
+  const reqKeys = Object.keys(req.body);
+
   const query: string = `
   SELECT
        *
@@ -138,7 +178,25 @@ const validateDev = async (req: Request, res: Response, next: NextFunction) => {
   }
   const requiredKeys: Array<devRequired> = ["name", "email"];
 
-  const validateKey = requiredKeys.every((el: string) => Keys.includes(el));
+  const validateKey = Keys.filter((el: any) => requiredKeys.includes(el));
+
+  const validateAllKeys = requiredKeys.every((key: any) =>
+    reqKeys.includes(key)
+  );
+
+  const validateEntriesKeys = validateKey.map((key: any) => {
+    return [key, req.body[key]];
+  });
+
+  const validateDevEntries = Object.fromEntries(validateEntriesKeys);
+
+  req.validateDevEntries = validateDevEntries;
+
+  if (!validateAllKeys) {
+    return res
+      .status(400)
+      .json({ message: `Required keys are: ${requiredKeys}` });
+  }
 
   if (req.method === "PATCH") {
     if (!validateKey) {
@@ -149,17 +207,13 @@ const validateDev = async (req: Request, res: Response, next: NextFunction) => {
     }
   }
 
-  if (!validateKey) {
-    return res
-      .status(400)
-      .json({ message: `Required keys are: ${requiredKeys}` });
-  }
-
   next();
 };
 
 const ProjectKeys = async (req: Request, res: Response, next: NextFunction) => {
-  const Keys = Object.keys(req.body);
+  const Keys: Array<string> = Object.keys(req.body);
+
+  const reqKeys = Object.keys(req.body);
 
   const requiredKeys: Array<projectRequire> = [
     "name",
@@ -167,15 +221,30 @@ const ProjectKeys = async (req: Request, res: Response, next: NextFunction) => {
     "estimatedTime",
     "repository",
     "startDate",
+    "developerId",
   ];
 
-  const validateKey = requiredKeys.every((el: string) => Keys.includes(el));
+  const validateKey = Keys.filter((keys: any) => {
+    return requiredKeys.includes(keys);
+  });
 
-  if (!validateKey) {
-    return res.status(400).json({
-      message: `Valide Keys Are: ${requiredKeys}`,
-    });
+  const validateAllKeys = requiredKeys.every((key: any) =>
+    reqKeys.includes(key)
+  );
+
+  if (!validateAllKeys) {
+    return res
+      .status(400)
+      .json({ message: `Required keys are: ${requiredKeys}` });
   }
+
+  const validateEntriesKeys = validateKey.map((key: any) => {
+    return [key, req.body[key]];
+  });
+
+  const validateEntries = Object.fromEntries(validateEntriesKeys);
+
+  req.validateEntries = validateEntries;
 
   const query: string = `
   SELECT

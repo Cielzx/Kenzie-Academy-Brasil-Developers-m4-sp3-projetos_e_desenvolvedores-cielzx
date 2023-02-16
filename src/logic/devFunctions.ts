@@ -14,7 +14,7 @@ const createDeveloper = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const devData: iDeveloperRequest = req.body;
+  const devData: iDeveloperRequest = req.validateDevEntries;
 
   const queryString: string = format(
     `

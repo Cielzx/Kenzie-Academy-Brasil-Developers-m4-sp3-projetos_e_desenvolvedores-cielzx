@@ -15,7 +15,7 @@ const createProjects = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const projectData: iProjectRequest = req.body;
+  const projectData: iProjectRequest = req.validateEntries;
 
   let queryString: string = format(
     `
@@ -39,7 +39,7 @@ const createTechnologies = async (
   res: Response
 ): Promise<Response> => {
   const projectId: number = +req.params.id;
-  const techData: iTechRequest = req.body;
+  const techData: iTechRequest = req.validateTech;
 
   let queryString: string = `
       SELECT
@@ -263,7 +263,7 @@ const deleteTech = async (req: Request, res: Response): Promise<Response> => {
 const updatePrj = async (req: Request, res: Response): Promise<Response> => {
   const id: number = +req.params.id;
 
-  const data: iUpdateProject = req.body;
+  const data: iUpdateProject = req.validateUpdate;
 
   const queryStr: string = format(
     `

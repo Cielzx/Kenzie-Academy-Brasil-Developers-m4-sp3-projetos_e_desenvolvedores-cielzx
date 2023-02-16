@@ -32,13 +32,16 @@ interface iTech {
   techId: number;
 }
 
+type techRequire = "name";
+
 type TechResult = QueryResult<iTech>;
 type projectRequire =
   | "name"
   | "description"
   | "estimatedTime"
   | "repository"
-  | "startDate";
+  | "startDate"
+  | "developerId";
 
 export {
   iProjectRequest,
@@ -50,4 +53,5 @@ export {
   iTechRequest,
   TechResult,
   projectRequire,
+  techRequire,
 };

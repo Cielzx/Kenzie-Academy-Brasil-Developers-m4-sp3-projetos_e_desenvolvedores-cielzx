@@ -56,7 +56,7 @@ app.get("/developers/:id/projects", getDeveloperProject);
 
 app.get("/projects", getAllProject);
 
-app.patch("/developers/:id", validateDev, updateDev);
+app.patch("/developers/:id", updateDev);
 
 app.patch("/projects/:id", validateUpdate, updatePrj);
 

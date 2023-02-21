@@ -16,6 +16,17 @@ interface iUpdateProject {
 
 type updateRequire = "endDate" | "estimatedTime";
 
+type updateProjectRequire =
+  | "name"
+  | "description"
+  | "estimatedTime"
+  | "repository"
+  | "startDate"
+  | "endDate"
+  | "developerId";
+
+type updateInfo = "developerSince" | "preferredOS";
+
 interface iProject extends iProjectRequest {
   id: number;
 }
@@ -54,4 +65,5 @@ export {
   TechResult,
   projectRequire,
   techRequire,
+  updateProjectRequire,
 };

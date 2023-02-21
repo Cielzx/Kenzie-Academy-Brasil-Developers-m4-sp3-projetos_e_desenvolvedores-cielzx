@@ -38,7 +38,7 @@ const createDevInfos = async (
   res: Response
 ): Promise<Response> => {
   const devId: number = +req.params.id;
-  const infoData: iDevInfoRequest = req.body;
+  const infoData: iDevInfoRequest = req.validateInfoBody;
 
   let queryString: string = format(
     `
@@ -79,6 +79,7 @@ const getAllDevs = async (req: Request, res: Response): Promise<Response> => {
   SELECT
       de."id" AS "developerID",
       de."name" AS "developerName",
+      de."developerInfoId" AS "developerInfoId",
       de."email" AS "developerEmail",
       di."developerSince" AS "developerInfoDeveloperSince",
       di."preferredOS" AS "developerInfoPreferredOS"
@@ -116,7 +117,11 @@ const getDevsPerId = async (req: Request, res: Response): Promise<Response> => {
 const updateDev = async (req: Request, res: Response): Promise<Response> => {
   const id: number = +req.params.id;
 
-  const data: iDeveloperRequest = req.body;
+  const data: iDeveloperRequest = req.validateDevEntries;
+
+  if (Object.values(data).length === 0) {
+    return res.status(400).json({ message: "Body is empty" });
+  }
 
   const queryStr: string = format(
     `
@@ -143,7 +148,7 @@ const updateDev = async (req: Request, res: Response): Promise<Response> => {
 const updateInfo = async (req: Request, res: Response): Promise<Response> => {
   const id: number = +req.params.id;
 
-  const data: iDevInfoRequest = req.body;
+  const data: iDevInfoRequest = req.validateInfoBody;
 
   const queryStr: string = format(
     `

@@ -43,7 +43,16 @@ CREATE TABLE IF NOT EXISTS projects(
 	addedIn DATE NOT NULL
 	);
 
-	INSERT INTO 
+INSERT INTO 
 	technologies(name)
 VALUES
-  ('MongoDB');
+  ('JavaScript'),
+ ('Python'),
+ ('React'),
+ ('Express.js'),
+ ('HTML'),
+ ('CSS'),
+ ('Django'),
+ ('PostgreSQL'),
+ ('MongoDB')
+;

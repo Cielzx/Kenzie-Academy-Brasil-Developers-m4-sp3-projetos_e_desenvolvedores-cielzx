@@ -265,6 +265,8 @@ const updatePrj = async (req: Request, res: Response): Promise<Response> => {
 
   const data: iUpdateProject = req.validateUpdate;
 
+  console.log(data);
+
   const queryStr: string = format(
     `
     UPDATE

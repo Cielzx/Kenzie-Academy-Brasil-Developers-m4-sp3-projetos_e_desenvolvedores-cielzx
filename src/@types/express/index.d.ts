@@ -7,6 +7,7 @@ declare global {
       validateDevEntries: Array;
       validateUpdate: Array;
       validateTech: Array;
+      validateInfoBody: Array;
     }
   }
 }

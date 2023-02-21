@@ -11,6 +11,7 @@ import { QueryConfig, QueryResult } from "pg";
 import {
   projectRequire,
   techRequire,
+  updateProjectRequire,
   updateRequire,
 } from "../interface/ProjectInterface";
 
@@ -19,36 +20,56 @@ const validateDevInfo = async (
   res: Response,
   next: NextFunction
 ) => {
-  const infoKeys = Object.keys(req.body);
   const osInfos = req.body;
+
+  const UpdateKeys: Array<string> = Object.keys(req.body);
+
+  const requiredOs: Array<InfoRequire> = ["Windows", "MacOs", "Linux"];
+
+  const validateOs = requiredOs.find((el, i) => osInfos["preferredOS"] === el);
+
+  if (!validateOs) {
+    return res.status(400).json({ message: `Valids are ${requiredOs}` });
+  }
+
+  const requiredUpdateKeys: Array<devInfoRequire> = [
+    "developerSince",
+    "preferredOS",
+  ];
+
+  const validateUpdateKey = requiredUpdateKeys.filter((el: string) =>
+    UpdateKeys.includes(el)
+  );
+  const validateEntriesKeys = validateUpdateKey.map((key: any) => {
+    return [key, req.body[key]];
+  });
+
+  const validateInfoBody = Object.fromEntries(validateEntriesKeys);
+
+  req.validateInfoBody = validateInfoBody;
+
+  next();
+};
+
+const validateDevInfoBody = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const infoKeys = Object.keys(req.body);
 
   const requiredInfoKeys: Array<devInfoRequire> = [
     "developerSince",
     "preferredOS",
   ];
-
-  const requiredOs: Array<InfoRequire> = ["Windows", "MacOs", "Linux"];
-
-  const validateOs = requiredOs.every((el) => osInfos["preferredOS"] === el);
-
-  console.log(validateOs);
-
-  // if (osInfos.preferredOS != requiredOs) {
-  //   return res.status(400).json({
-  //     message: "At least one of those keys must be send.",
-  //     keys: requiredOs,
-  //   });
-  // }
-
   const validateInfoKey = requiredInfoKeys.every((el: string) =>
     infoKeys.includes(el)
   );
 
   if (!validateInfoKey) {
-    return res.status(400).json({
-      message: "At least one of those keys must be send.",
-      keys: ["developerSince", "preferredOS"],
-    });
+    return res
+      .status(400)
+      .json({ message: `Valid Keys are ${requiredInfoKeys}` });
   }
 
   next();
@@ -63,9 +84,21 @@ const validateUpdate = async (
 
   const UpdateKeys: Array<string> = Object.keys(req.body);
 
+  if (Object.values(UpdateKeys[0]).length === 0) {
+    return res.status(400);
+  }
+
   const reqKeys = Object.keys(req.body);
 
-  const requiredUpdateKeys: Array<updateRequire> = ["estimatedTime"];
+  const requiredUpdateKeys: Array<updateProjectRequire> = [
+    "name",
+    "description",
+    "estimatedTime",
+    "repository",
+    "startDate",
+    "endDate",
+    "developerId",
+  ];
 
   const validateUpdateKey = requiredUpdateKeys.filter((el: string) =>
     UpdateKeys.includes(el)
@@ -75,11 +108,11 @@ const validateUpdate = async (
     reqKeys.includes(key)
   );
 
-  if (!validateAllKeys) {
-    return res
-      .status(400)
-      .json({ message: `Required keys are: ${requiredUpdateKeys}` });
-  }
+  // if (!validateAllKeys) {
+  //   return res
+  //     .status(400)
+  //     .json({ message: `Required keys are: ${requiredUpdateKeys}` });
+  // }
 
   const validateEntriesKeys = validateUpdateKey.map((key: any) => {
     return [key, req.body[key]];
@@ -98,19 +131,31 @@ const validateUpdate = async (
 
   const queryResult: QueryResult = await client.query(queryString);
 
-  const devFind = queryResult.rows.find((el) => +el.id === id);
+  const projectFind = queryResult.rows.find((el) => el.id === +id);
 
-  if (!devFind) {
+  if (!projectFind) {
     return res.status(404).json({
       message: "Project not found.",
     });
   }
 
-  if (!devFind.developerId) {
-    return res.status(404).json({
-      message: "Dev not found.",
-    });
-  }
+  // let devFind = validateUpdate.find(
+  //   (el: any) =>
+  //     el.developerId === +req.body.developerId || el.developerId === undefined
+  // );
+
+  // console.log(devFind);
+
+  // queryResult.rows.forEach((el, index) => {
+  //   if (
+  //     req.body["developerId"] != el.developerId &&
+  //     req.body["deveoperId"] != undefined
+  //   ) {
+  //     return res.status(404).json({
+  //       message: "Dev not found.",
+  //     });
+  //   }
+  // });
 
   next();
 };
@@ -155,6 +200,44 @@ const projectValidation = async (
   next();
 };
 
+const validateDevBody = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const Keys: Array<string> = Object.keys(req.body);
+  const requiredKeys: Array<devRequired> = ["name", "email"];
+
+  const validateKey = Keys.filter((el: any) => requiredKeys.includes(el));
+
+  const validateEntriesKeys = validateKey.map((key: any) => {
+    return [key, req.body[key]];
+  });
+
+  const validateDevEntries = Object.fromEntries(validateEntriesKeys);
+
+  req.validateDevEntries = validateDevEntries;
+
+  const query: string = `
+  SELECT
+       *
+  FROM
+    developers;
+  `;
+
+  const queryResult: devQueryResult = await client.query(query);
+
+  const filterInfos = queryResult.rows.find(
+    (el) => el.email === req.body.email
+  );
+
+  if (filterInfos) {
+    return res.status(409).json({ message: "Email already exists!" });
+  }
+
+  next();
+};
+
 const validateDev = async (req: Request, res: Response, next: NextFunction) => {
   const Keys: Array<string> = Object.keys(req.body);
 
@@ -176,6 +259,7 @@ const validateDev = async (req: Request, res: Response, next: NextFunction) => {
   if (filterInfos) {
     return res.status(409).json({ message: "Email already exists!" });
   }
+
   const requiredKeys: Array<devRequired> = ["name", "email"];
 
   const validateKey = Keys.filter((el: any) => requiredKeys.includes(el));
@@ -199,12 +283,12 @@ const validateDev = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   if (req.method === "PATCH") {
-    if (!validateKey) {
-      return res.status(400).json({
-        message: "At least one of those keys must be send.",
-        keys: ["name", "email"],
-      });
-    }
+    // if (!validateKey) {
+    //   return res.status(400).json({
+    //     message: "At least one of those keys must be send.",
+    //     keys: ["name", "email"],
+    //   });
+    // }
   }
 
   next();
@@ -325,4 +409,6 @@ export {
   validateUpdate,
   ProjectKeys,
   projectValidation,
+  validateDevInfoBody,
+  validateDevBody,
 };

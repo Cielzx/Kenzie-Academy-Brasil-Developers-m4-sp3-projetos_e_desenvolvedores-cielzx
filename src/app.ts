@@ -26,7 +26,9 @@ import {
   ProjectKeys,
   projectValidation,
   validateDev,
+  validateDevBody,
   validateDevInfo,
+  validateDevInfoBody,
   validateUpdate,
 } from "../src/middleware/middleware";
 
@@ -43,6 +45,7 @@ app.post(
   "/developers/:id/infos",
   ensureDevExist,
   validateDevInfo,
+  validateDevInfoBody,
   createDevInfos
 );
 
@@ -56,7 +59,7 @@ app.get("/developers/:id/projects", getDeveloperProject);
 
 app.get("/projects", getAllProject);
 
-app.patch("/developers/:id", updateDev);
+app.patch("/developers/:id", validateDevBody, updateDev);
 
 app.patch("/projects/:id", validateUpdate, updatePrj);
 
